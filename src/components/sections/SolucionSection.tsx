@@ -3,6 +3,7 @@ import { stackTecnologico, enfoques, archivoReglasAdaptacion, costosEstimados } 
 export default function SolucionSection() {
   return (
     <section
+      id="fase-02"
       className="min-h-screen px-6 py-20 bg-white"
       aria-labelledby="solucion-titulo"
     >
