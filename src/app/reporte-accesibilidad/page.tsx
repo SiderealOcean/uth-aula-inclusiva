@@ -86,9 +86,9 @@ export default function ReporteAccesibilidadPage() {
         {/* Results por página auditada */}
         <h3 className="font-semibold text-gray-900 mb-3">Resultados de la auditoría automatizada (axe DevTools)</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          {[resumenAuditoria.home, resumenAuditoria.reporte].map((r) => (
+          {[resumenAuditoria.lms, resumenAuditoria.whatsapp].map((r) => (
             <div key={r.url} className="bg-white rounded-lg p-4 border border-gray-200">
-              <div className="text-sm font-semibold text-gray-900 mb-2">{r.url === "/" ? "🏠 Home" : "📋 Reporte Accesibilidad"}</div>
+              <div className="text-sm font-semibold text-gray-900 mb-2">{r.url === "/audit/lms" ? "🖥️ Plataforma Web (LMS)" : "📱 Delivery Adaptativo por WhatsApp"}</div>
               <div className="flex gap-4 text-sm">
                 <span className="text-emerald-700 font-medium">✓ {r.passes} passes</span>
                 <span className="text-red-700 font-medium">✗ {r.violations} violaciones</span>
@@ -162,32 +162,32 @@ export default function ReporteAccesibilidadPage() {
           Evidencia visual — Auditoría con axe DevTools
         </h2>
         <p className="text-sm text-gray-600 mb-6">
-          Capturas generadas ejecutando axe-core vía Playwright en el sitio compilado
-          (producción). Se auditaron ambas rutas: Home y Reporte Accesibilidad.
+          Capturas generadas ejecutando axe-core vía Playwright sobre los dos componentes
+          del proyecto: Plataforma Web (LMS) y Delivery Adaptativo por WhatsApp.
         </p>
 
         <h3 className="font-semibold text-gray-900 mb-4">Capturas de página completa</h3>
         <div className="grid md:grid-cols-2 gap-6 mb-8">
           <div className="bg-white border border-gray-200 rounded-lg p-4">
             <div className="flex items-center gap-2 mb-2">
-              <span className="text-sm font-semibold text-gray-900">Home</span>
-              <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded">49 passes, 2 violaciones</span>
+              <span className="text-sm font-semibold text-gray-900">Plataforma Web (LMS)</span>
+              <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded">39 passes, 2 violaciones</span>
             </div>
             <img
-              src="/audits/home-screenshot.png"
-              alt="Captura de Home auditada con axe DevTools"
+              src="/audits/lms-screenshot.png"
+              alt="Captura del componente LMS auditado con axe DevTools"
               className="w-full border border-gray-200 rounded"
               loading="lazy"
             />
           </div>
           <div className="bg-white border border-gray-200 rounded-lg p-4">
             <div className="flex items-center gap-2 mb-2">
-              <span className="text-sm font-semibold text-gray-900">Reporte Accesibilidad</span>
-              <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded">37 passes, 1 violación</span>
+              <span className="text-sm font-semibold text-gray-900">Delivery Adaptativo por WhatsApp</span>
+              <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded">35 passes, 2 violaciones</span>
             </div>
             <img
-              src="/audits/reporte-screenshot.png"
-              alt="Captura de Reporte Accesibilidad auditada con axe DevTools"
+              src="/audits/whatsapp-screenshot.png"
+              alt="Captura del componente WhatsApp auditado con axe DevTools"
               className="w-full border border-gray-200 rounded"
               loading="lazy"
             />
@@ -197,14 +197,29 @@ export default function ReporteAccesibilidadPage() {
         <h3 className="font-semibold text-gray-900 mb-4">Violaciones detectadas por axe-core</h3>
         <div className="space-y-4">
           <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-            <h4 className="font-bold text-sm text-red-800 mb-2">1.4.3 Contraste mínimo (AA) — 10 nodos en Home</h4>
+            <h4 className="font-bold text-sm text-red-800 mb-2">1.4.3 Contraste mínimo (AA) — 1 nodo en LMS</h4>
             <p className="text-sm text-gray-700 mb-2">
-              Textos decorativos secundarios con contraste insuficiente. Los elementos
-              afectados son etiquetas de metadato, pies de fuente, y badges de estado
-              que no representan información crítica para la navegación.
+              Texto .text-gray-500 en el contenedor de estadísticas del dashboard LMS
+              con contraste insuficiente sobre fondo blanco. 10 nodos adicionales
+              marcados como incompletos, pendientes de revisión manual.
             </p>
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
-              {["home-violation-color-contrast-0", "home-violation-color-contrast-1", "home-violation-color-contrast-2", "home-violation-color-contrast-3", "home-violation-color-contrast-4"].map((name) => (
+            <img
+              src="/audits/lms-violation-color-contrast-0.png"
+              alt="Violación de contraste en LMS"
+              className="w-64 border border-red-200 rounded"
+              loading="lazy"
+            />
+          </div>
+
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <h4 className="font-bold text-sm text-red-800 mb-2">1.4.3 Contraste mínimo (AA) — 3 nodos en WhatsApp</h4>
+            <p className="text-sm text-gray-700 mb-2">
+              Elementos con contraste insuficiente en el simulador WhatsApp:
+              fondo ámbar con texto, texto semibold y texto con opacidad reducida.
+              2 nodos adicionales incompletos.
+            </p>
+            <div className="grid grid-cols-3 gap-2">
+              {["whatsapp-violation-color-contrast-0", "whatsapp-violation-color-contrast-1", "whatsapp-violation-color-contrast-2"].map((name) => (
                 <img
                   key={name}
                   src={`/audits/${name}.png`}
@@ -217,25 +232,12 @@ export default function ReporteAccesibilidadPage() {
           </div>
 
           <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-            <h4 className="font-bold text-sm text-red-800 mb-2">4.1.1 Landmarks duplicados — 1 nodo en Home</h4>
-            <p className="text-sm text-gray-700 mb-2">
-              axe no puede resolver la unicidad de los landmarks mediante aria-labelledby
-              durante el análisis automatizado. Cada sección tiene un id y aria-labelledby
-              único, pero la herramienta no asocia correctamente la referencia.
-            </p>
-            <img
-              src="/audits/home-violation-landmark-unique-0.png"
-              alt="Violación de landmark único"
-              className="w-64 border border-red-200 rounded"
-              loading="lazy"
-            />
-          </div>
-
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-            <h4 className="font-bold text-sm text-red-800 mb-2">1.4.3 Contraste mínimo (AA) — 2 nodos en Reporte</h4>
+            <h4 className="font-bold text-sm text-red-800 mb-2">page-has-heading-one — 1 nodo en LMS y 1 nodo en WhatsApp</h4>
             <p className="text-sm text-gray-700">
-              Badges de nivel WCAG con fondo azul claro (bg-blue-100) y texto azul (text-blue-800).
-              El contrato es insuficiente para texto pequeño.
+              Las páginas de auditoría contienen únicamente los componentes sin un
+              encabezado de nivel 1 (&lt;h1&gt;). Los componentes usan h2/h3 para su
+              estructura interna. Se recomienda agregar un h1 en la página wrapper
+              para cumplir con la estructura jerárquica de encabezados.
             </p>
           </div>
         </div>

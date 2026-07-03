@@ -44,12 +44,21 @@ export const resultadosWCAG: ResultadoWCAG[] = [
   },
   {
     codigo: "1.4.3",
-    nombre: "Contraste mínimo",
+    nombre: "Contraste mínimo (LMS)",
     nivel: "AA",
-    plataforma: "Ambos",
+    plataforma: "LMS",
     resultado: "Incompleto",
-    elementoEvaluado: "Textos secundarios: .text-gray-400 sobre blanco, .text-amber-700 sobre .bg-amber-100, .text-red-600 sobre .bg-brand-50",
-    accionTomada: "Contraste principal (brand.500 #1e40af sobre blanco) pasa 4.5:1. Textos decorativos secundarios no cumplen. Axe detectó 10 nodos con contraste insuficiente en Home y 2 en Reporte. Se corrigieron los más críticos (text-gray-400 → text-gray-500).",
+    elementoEvaluado: "Texto .text-gray-500 en contenedor de estadísticas del dashboard LMS",
+    accionTomada: "Contraste principal (brand.500 #1e40af sobre blanco) pasa 4.5:1. El texto .px-4.text-center.text-gray-500 tiene contraste insuficiente (1 violación) y 10 nodos adicionales con contraste incompleto. Pendiente de revisión manual.",
+  },
+  {
+    codigo: "1.4.3",
+    nombre: "Contraste mínimo (WhatsApp)",
+    nivel: "AA",
+    plataforma: "WhatsApp",
+    resultado: "No pasa",
+    elementoEvaluado: "Textos .bg-amber-100, .font-semibold, .opacity-80 en la simulación WhatsApp",
+    accionTomada: "3 nodos con contraste insuficiente detectados en la interfaz del simulador WhatsApp: fondo ámbar con texto, texto semibold sobre fondo claro, y texto con opacidad reducida. 2 nodos adicionales incompletos.",
   },
   {
     codigo: "2.1.1",
@@ -70,31 +79,13 @@ export const resultadosWCAG: ResultadoWCAG[] = [
     accionTomada: "No hay contenido con destellos ni parpadeos; animaciones CSS son fadeIn suaves. Axe: 0 violaciones.",
   },
   {
-    codigo: "2.4.1",
-    nombre: "Evitar bloques",
-    nivel: "A",
-    plataforma: "LMS",
-    resultado: "Pasa",
-    elementoEvaluado: "Enlace 'Saltar al contenido principal' al inicio de cada página",
-    accionTomada: "Skip-to-content link implementado en layout.tsx con clase sr-only/focus:not-sr-only. Axe: 0 violaciones.",
-  },
-  {
     codigo: "2.4.6",
     nombre: "Encabezados y etiquetas",
     nivel: "AA",
     plataforma: "LMS",
     resultado: "Pasa",
-    elementoEvaluado: "Secciones del dashboard con headings semánticos y aria-labelledby",
-    accionTomada: "Cada sección usa h2/h3 con ids vinculados via aria-labelledby. Axe: 0 violaciones.",
-  },
-  {
-    codigo: "3.1.1",
-    nombre: "Idioma de la página",
-    nivel: "A",
-    plataforma: "Ambos",
-    resultado: "Pasa",
-    elementoEvaluado: "Atributo lang en el elemento HTML",
-    accionTomada: "lang='es' configurado en layout.tsx. Axe: 0 violaciones.",
+    elementoEvaluado: "Secciones del dashboard con headings semánticos (h2/h3) y aria-labelledby",
+    accionTomada: "Cada sección usa h2/h3 con ids vinculados via aria-labelledby. Axe: 0 violaciones en heading-order y empty-heading.",
   },
   {
     codigo: "3.3.2",
@@ -114,29 +105,20 @@ export const resultadosWCAG: ResultadoWCAG[] = [
     elementoEvaluado: "Tabs, botones, regiones ARIA en LMSDashboard",
     accionTomada: "role='tab', 'tabpanel', 'region' con aria-selected y aria-expanded correctamente vinculados. Axe: 0 violaciones.",
   },
-  {
-    codigo: "4.1.1",
-    nombre: "Landmarks (parsing)",
-    nivel: "A",
-    plataforma: "Ambos",
-    resultado: "No pasa",
-    elementoEvaluado: "Landmarks duplicados: múltiples regiones sin etiqueta única detectable por axe",
-    accionTomada: "Cada sección tiene aria-labelledby único, pero axe no resuelve correctamente la asociación en el scan automático. Mejora futura: agregar role explícito con aria-label adicional.",
-  },
 ];
 
 export const resumenAuditoria = {
-  home: {
-    url: "/",
-    passes: 49,
+  lms: {
+    url: "/audit/lms",
+    passes: 39,
     violations: 2,
-    incomplete: 2,
+    incomplete: 1,
   },
-  reporte: {
-    url: "/reporte-accesibilidad",
-    passes: 37,
-    violations: 1,
-    incomplete: 0,
+  whatsapp: {
+    url: "/audit/whatsapp",
+    passes: 35,
+    violations: 2,
+    incomplete: 1,
   },
 };
 
@@ -144,13 +126,13 @@ export const principiosPOURReporte = [
   {
     principio: "Perceptible",
     descripcion: "La información y los componentes de la interfaz deben presentarse de modo que los usuarios puedan percibirlos.",
-    aplicacionLMS: "Textos con contraste AA, iconos con etiquetas, imágenes con alt text, soporte para lectores de pantalla con ARIA labels.",
+    aplicacionLMS: "Textos con contraste AA (pendiente revisión en textos secundarios), iconos con aria-hidden, soporte para lectores de pantalla con ARIA labels en todos los controles.",
     aplicacionWhatsApp: "Contenido entregado en 4 formatos (texto, audio, imagen, video) según la preferencia del perfil; el usuario elige cómo recibir la información.",
   },
   {
     principio: "Operable",
     descripcion: "Los componentes de la interfaz y la navegación deben poder utilizarse.",
-    aplicacionLMS: "Navegación completa por teclado con roles ARIA, skip-to-content link, manejo de foco visible con focus-visible de 3px.",
+    aplicacionLMS: "Navegación completa por teclado con roles ARIA (tablist, tab, tabpanel), sidebar navegable con teclado y foco visible con focus-visible de 3px.",
     aplicacionWhatsApp: "Navegación por mensajes de texto con botones de respuesta rápida; funciona sin mouse ni pantalla táctil avanzada.",
   },
   {
@@ -162,7 +144,7 @@ export const principiosPOURReporte = [
   {
     principio: "Robusto",
     descripcion: "El contenido debe ser suficientemente robusto para ser interpretado de forma fiable por una amplia variedad de agentes de usuario, incluidos los productos de apoyo.",
-    aplicacionLMS: "HTML semántico con roles ARIA explícitos (region, tab, tabpanel) compatible con NVDA, VoiceOver y TalkBack.",
+    aplicacionLMS: "HTML semántico con roles ARIA explícitos (tablist, tab, tabpanel, region) y estados (aria-selected, aria-current) compatible con NVDA, VoiceOver y TalkBack.",
     aplicacionWhatsApp: "La simulación usa markup semántico con atributos ARIA; el delivery real por WhatsApp API es nativamente accesible desde la app de WhatsApp.",
   },
 ];
@@ -176,17 +158,17 @@ export const iteracionesMejora: IteracionMejora[] = [
     plataforma: "WhatsApp",
   },
   {
-    titulo: "Skip-to-content y foco visible en layout",
-    descripcion: "No existía mecanismo para saltar bloques de navegación repetitivos ni indicador visual de foco en todos los elementos.",
-    antes: "Sin skip-to-content link; focus outline solo por defecto del navegador (inconsistente entre navegadores).",
-    despues: "Enlace 'Saltar al contenido principal' al inicio del body con sr-only/focus:not-sr-only; focus-visible de 3px azul en todos los elementos.",
+    titulo: "Tabs con role='tablist' y aria-label en LMSDashboard",
+    descripcion: "Los botones de selección de vista (Estudiante/Organización) no tenían contenedor semántico que agrupara los tabs ni etiqueta descriptiva para lectores de pantalla.",
+    antes: "Dos botones sueltos sin contenedor role='tablist'; cada botón tenía role='tab' pero sin grupo padre que los relacione como conjunto de tabs.",
+    despues: "Contenedor <div> con role='tablist' y aria-label='Selección de vista'; cada botón mantiene role='tab' con aria-selected dinámico.",
     plataforma: "LMS",
   },
 ];
 
 export const herramientaAuditoria = {
   nombre: "axe DevTools",
-  version: "4.9",
+  version: "4.12",
   tipo: "CLI + Playwright",
   url: "https://www.deque.com/axe/",
 };

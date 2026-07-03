@@ -9,8 +9,8 @@ const outputDir = resolve(__dirname, "..", "public", "audits");
 const baseUrl = process.env.BASE_URL || "http://localhost:3000";
 
 const pages = [
-  { path: "/", name: "home" },
-  { path: "/reporte-accesibilidad", name: "reporte" },
+  { path: "/audit/lms", name: "lms" },
+  { path: "/audit/whatsapp", name: "whatsapp" },
 ];
 
 if (!existsSync(outputDir)) {
