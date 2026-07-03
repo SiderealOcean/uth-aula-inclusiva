@@ -16,7 +16,8 @@ export default function DemoLMSSection() {
         <p className="text-pres-body text-gray-700 mb-8 max-w-3xl">
           Dashboard donde los estudiantes exploran cursos, siguen su progreso
           y descargan certificados. Las organizaciones crean y gestionan contenido
-          desde el panel de administración.
+          con IA desde el panel de administración. Cambia entre vista de
+          estudiante y organización con las pestañas.
         </p>
         <LMSDashboard />
       </div>
