@@ -5,7 +5,9 @@ import {
   herramientaAuditoria,
   resumenAuditoria,
 } from "@/data/reporte-accesibilidad";
+import Image from "next/image";
 import WcagReportTable from "@/components/ui/WcagReportTable";
+import ExportWordButton from "@/components/ui/ExportWordButton";
 
 function POURCard({
   principio,
@@ -49,9 +51,12 @@ export default function ReporteAccesibilidadPage() {
         <span className="text-sm uppercase tracking-widest text-brand-500 mb-2 block">
           Entregable E3
         </span>
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">
-          Reporte de Evaluación de Accesibilidad
-        </h1>
+        <div className="flex items-start justify-between flex-wrap gap-4 mb-4">
+          <h1 className="text-4xl font-bold text-gray-900">
+            Reporte de Evaluación de Accesibilidad
+          </h1>
+          <ExportWordButton />
+        </div>
         <p className="text-gray-600 max-w-3xl">
           Evaluación técnica basada en WCAG 2.2 aplicada a los dos componentes principales
           del proyecto: la Plataforma Web (LMS) y el Delivery Adaptativo por WhatsApp.
@@ -173,24 +178,28 @@ export default function ReporteAccesibilidadPage() {
               <span className="text-sm font-semibold text-gray-900">Plataforma Web (LMS)</span>
               <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded">39 passes, 2 violaciones</span>
             </div>
-            <img
-              src="/audits/lms-screenshot.png"
-              alt="Captura del componente LMS auditado con axe DevTools"
-              className="w-full border border-gray-200 rounded"
-              loading="lazy"
-            />
+            <div className="relative w-full aspect-[4/3]">
+              <Image
+                src="/audits/lms-screenshot.png"
+                alt="Captura del componente LMS auditado con axe DevTools"
+                fill
+                className="object-contain border border-gray-200 rounded"
+              />
+            </div>
           </div>
           <div className="bg-white border border-gray-200 rounded-lg p-4">
             <div className="flex items-center gap-2 mb-2">
               <span className="text-sm font-semibold text-gray-900">Delivery Adaptativo por WhatsApp</span>
               <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded">35 passes, 2 violaciones</span>
             </div>
-            <img
-              src="/audits/whatsapp-screenshot.png"
-              alt="Captura del componente WhatsApp auditado con axe DevTools"
-              className="w-full border border-gray-200 rounded"
-              loading="lazy"
-            />
+            <div className="relative w-full aspect-[4/3]">
+              <Image
+                src="/audits/whatsapp-screenshot.png"
+                alt="Captura del componente WhatsApp auditado con axe DevTools"
+                fill
+                className="object-contain border border-gray-200 rounded"
+              />
+            </div>
           </div>
         </div>
 
@@ -203,12 +212,14 @@ export default function ReporteAccesibilidadPage() {
               con contraste insuficiente sobre fondo blanco. 10 nodos adicionales
               marcados como incompletos, pendientes de revisión manual.
             </p>
-            <img
-              src="/audits/lms-violation-color-contrast-0.png"
-              alt="Violación de contraste en LMS"
-              className="w-64 border border-red-200 rounded"
-              loading="lazy"
-            />
+            <div className="relative w-64 h-40">
+              <Image
+                src="/audits/lms-violation-color-contrast-0.png"
+                alt="Violación de contraste en LMS"
+                fill
+                className="object-contain border border-red-200 rounded"
+              />
+            </div>
           </div>
 
           <div className="bg-red-50 border border-red-200 rounded-lg p-4">
@@ -220,13 +231,14 @@ export default function ReporteAccesibilidadPage() {
             </p>
             <div className="grid grid-cols-3 gap-2">
               {["whatsapp-violation-color-contrast-0", "whatsapp-violation-color-contrast-1", "whatsapp-violation-color-contrast-2"].map((name) => (
-                <img
-                  key={name}
-                  src={`/audits/${name}.png`}
-                  alt={`Violación de contraste: ${name}`}
-                  className="w-full border border-red-200 rounded"
-                  loading="lazy"
-                />
+                <div key={name} className="relative w-full h-24">
+                  <Image
+                    src={`/audits/${name}.png`}
+                    alt={`Violación de contraste: ${name}`}
+                    fill
+                    className="object-contain border border-red-200 rounded"
+                  />
+                </div>
               ))}
             </div>
           </div>
