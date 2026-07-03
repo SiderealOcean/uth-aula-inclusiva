@@ -44,7 +44,7 @@ export default function CreacionIASection() {
         </h2>
         <p className="text-pres-body text-gray-700 mb-8 max-w-3xl">
           Las organizaciones no necesitan producir 4 formatos manualmente.
-          Suben un "machote" con el contenido base y la IA genera todo
+          Suben un &quot;machote&quot; con el contenido base y la IA genera todo
           automáticamente: audio, imágenes accesibles, evaluaciones. Luego
           solo validan calidad y publican.
         </p>
