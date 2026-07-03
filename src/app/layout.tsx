@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import Header from "@/components/layout/Header";
 
 export const metadata: Metadata = {
   title: "Aula Inclusiva HN - Plataforma de Educación Digital Adaptativa",
@@ -21,6 +22,7 @@ export default function RootLayout({
         >
           Saltar al contenido principal
         </a>
+        <Header />
         <main id="contenido-principal">{children}</main>
       </body>
     </html>

@@ -1,4 +1,3 @@
-import Header from "@/components/layout/Header";
 import PhaseIndicator from "@/components/layout/PhaseIndicator";
 import HeroSection from "@/components/sections/HeroSection";
 import ContextoSection from "@/components/sections/ContextoSection";
@@ -15,7 +14,6 @@ import CierreSection from "@/components/sections/CierreSection";
 export default function Home() {
   return (
     <>
-      <Header />
       <PhaseIndicator />
 
       {/* Fase 01 */}
