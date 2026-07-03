@@ -6,6 +6,7 @@ interface WhatsAppSimulatorProps {
   formatoEntregado: string;
   descripcionFormato: string;
   inputValor: string;
+  onInputChange: (v: string) => void;
   onEnviar: () => void;
   escribiendo: boolean;
 }
@@ -52,6 +53,7 @@ export default function WhatsAppSimulator({
   formatoEntregado,
   descripcionFormato,
   inputValor,
+  onInputChange,
   onEnviar,
   escribiendo,
 }: WhatsAppSimulatorProps) {
@@ -147,7 +149,7 @@ export default function WhatsAppSimulator({
         {escribiendo && (
           <div className="flex justify-start">
             <div className="bg-white rounded-lg rounded-bl-sm px-4 py-3 shadow-sm">
-              <div className="flex gap-1" aria-label="El bot está escribiendo">
+              <div className="flex gap-1" role="status" aria-label="El bot está escribiendo">
                 <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
                 <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
                 <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
@@ -159,9 +161,15 @@ export default function WhatsAppSimulator({
 
       {/* Input bar */}
       <div className="bg-gray-100 px-3 py-2 flex items-center gap-2">
-        <div className="flex-1 bg-white rounded-full px-4 py-2 text-sm text-gray-400 border border-gray-200">
-          {inputValor || "Escribe un mensaje..."}
-        </div>
+        <input
+          type="text"
+          value={inputValor}
+          onChange={(e) => onInputChange(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Enter") onEnviar(); }}
+          placeholder="Escribe un mensaje..."
+          className="flex-1 bg-white rounded-full px-4 py-2 text-sm text-gray-900 border border-gray-200 outline-none focus:ring-2 focus:ring-green-400 placeholder:text-gray-400"
+          aria-label="Mensaje"
+        />
         <button
           onClick={onEnviar}
           className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center text-white hover:bg-green-600 transition-colors shrink-0"

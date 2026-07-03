@@ -46,7 +46,7 @@ export default function CourseCard({
             <span>{modsCompletos}/{modulos} módulos</span>
             <span className="font-bold">{progresoClamp}%</span>
           </div>
-          <div className="w-full bg-gray-200 rounded-full h-2.5" role="progressbar" aria-valuenow={progresoClamp} aria-valuemin={0} aria-valuemax={100}>
+          <div className="w-full bg-gray-200 rounded-full h-2.5" role="progressbar" aria-label="Progreso del curso" aria-valuenow={progresoClamp} aria-valuemin={0} aria-valuemax={100}>
             <div
               className="h-full rounded-full transition-all duration-500"
               style={{

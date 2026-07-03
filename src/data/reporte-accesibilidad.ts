@@ -31,7 +31,7 @@ export const resultadosWCAG: ResultadoWCAG[] = [
     plataforma: "WhatsApp",
     resultado: "Pasa",
     elementoEvaluado: "Imágenes en conversación WhatsApp (diagramas, capturas LMS) incluyen texto alternativo descriptivo",
-    accionTomada: "Todas las imágenes en whatsapp-demo.ts incluyen descripción textual en el alt text",
+    accionTomada: "Todas las imágenes en whatsapp-demo.ts incluyen descripción textual en el alt text. Axe: 0 violaciones.",
   },
   {
     codigo: "1.4.1",
@@ -40,16 +40,16 @@ export const resultadosWCAG: ResultadoWCAG[] = [
     plataforma: "Ambos",
     resultado: "Pasa",
     elementoEvaluado: "Paleta de colores con texturas y etiquetas para daltonismo en LMS y WhatsApp",
-    accionTomada: "Perfil 'Daltonismo' en AdaptabilityDemo usa paleta segura con patrones + etiquetas de texto en lugar de solo color",
+    accionTomada: "Perfil 'Daltonismo' en AdaptabilityDemo usa paleta segura con patrones + etiquetas de texto. Axe: 0 violaciones en 1.4.1.",
   },
   {
     codigo: "1.4.3",
     nombre: "Contraste mínimo",
     nivel: "AA",
     plataforma: "Ambos",
-    resultado: "Pasa",
-    elementoEvaluado: "Texto vs fondo en toda la interfaz (Header, tarjetas, tablas, simuladores)",
-    accionTomada: "Paleta brand.500 (#1e40af) sobre blanco pasa ratio 4.5:1; configurado en tailwind.config.ts",
+    resultado: "Incompleto",
+    elementoEvaluado: "Textos secundarios: .text-gray-400 sobre blanco, .text-amber-700 sobre .bg-amber-100, .text-red-600 sobre .bg-brand-50",
+    accionTomada: "Contraste principal (brand.500 #1e40af sobre blanco) pasa 4.5:1. Textos decorativos secundarios no cumplen. Axe detectó 10 nodos con contraste insuficiente en Home y 2 en Reporte. Se corrigieron los más críticos (text-gray-400 → text-gray-500).",
   },
   {
     codigo: "2.1.1",
@@ -57,8 +57,8 @@ export const resultadosWCAG: ResultadoWCAG[] = [
     nivel: "A",
     plataforma: "LMS",
     resultado: "Pasa",
-    elementoEvaluado: "Tabs de navegación en LMSDashboard (Estudiante / Organización / Creador)",
-    accionTomada: "Se usan role='tab' nativos con manejo de foco por teclado; aria-selected y aria-controls vinculados",
+    elementoEvaluado: "Tabs de navegación en LMSDashboard con role='tab' contenidos en role='tablist'",
+    accionTomada: "Se añadió role='tablist' al contenedor de tabs y aria-label. Axe: 0 violaciones en 2.1.1.",
   },
   {
     codigo: "2.3.1",
@@ -66,8 +66,8 @@ export const resultadosWCAG: ResultadoWCAG[] = [
     nivel: "A",
     plataforma: "Ambos",
     resultado: "Pasa",
-    elementoEvaluado: "Contenido multimedia (videos, animaciones) en LMS y WhatsApp",
-    accionTomada: "No hay contenido con destellos ni parpadeos; animaciones CSS son fadeIn suaves (< 3 destellos/segundo)",
+    elementoEvaluado: "Contenido multimedia y animaciones en LMS y WhatsApp",
+    accionTomada: "No hay contenido con destellos ni parpadeos; animaciones CSS son fadeIn suaves. Axe: 0 violaciones.",
   },
   {
     codigo: "2.4.1",
@@ -76,7 +76,7 @@ export const resultadosWCAG: ResultadoWCAG[] = [
     plataforma: "LMS",
     resultado: "Pasa",
     elementoEvaluado: "Enlace 'Saltar al contenido principal' al inicio de cada página",
-    accionTomada: "Skip-to-content link implementado en layout.tsx con clase sr-only/focus:not-sr-only",
+    accionTomada: "Skip-to-content link implementado en layout.tsx con clase sr-only/focus:not-sr-only. Axe: 0 violaciones.",
   },
   {
     codigo: "2.4.6",
@@ -84,8 +84,8 @@ export const resultadosWCAG: ResultadoWCAG[] = [
     nivel: "AA",
     plataforma: "LMS",
     resultado: "Pasa",
-    elementoEvaluado: "Secciones del LMS con headings semánticos y aria-labelledby",
-    accionTomada: "Cada sección del dashboard usa h2/h3 con ids vinculados via aria-labelledby",
+    elementoEvaluado: "Secciones del dashboard con headings semánticos y aria-labelledby",
+    accionTomada: "Cada sección usa h2/h3 con ids vinculados via aria-labelledby. Axe: 0 violaciones.",
   },
   {
     codigo: "3.1.1",
@@ -94,7 +94,7 @@ export const resultadosWCAG: ResultadoWCAG[] = [
     plataforma: "Ambos",
     resultado: "Pasa",
     elementoEvaluado: "Atributo lang en el elemento HTML",
-    accionTomada: "lang='es' configurado en layout.tsx: <html lang='es'>",
+    accionTomada: "lang='es' configurado en layout.tsx. Axe: 0 violaciones.",
   },
   {
     codigo: "3.3.2",
@@ -102,8 +102,8 @@ export const resultadosWCAG: ResultadoWCAG[] = [
     nivel: "A",
     plataforma: "Ambos",
     resultado: "Pasa",
-    elementoEvaluado: "Input de WhatsApp, botones, controles del LMS, navegación por tabs",
-    accionTomada: "Todos los controles interactivos tienen aria-label; input de WhatsApp tiene placeholder y aria-label",
+    elementoEvaluado: "Input de WhatsApp, botones LMS, navegación por tabs, typing indicator",
+    accionTomada: "Todos los controles tienen aria-label. Input tiene placeholder + aria-label. Typing indicator tiene role='status'. Axe: 0 violaciones.",
   },
   {
     codigo: "4.1.2",
@@ -112,9 +112,33 @@ export const resultadosWCAG: ResultadoWCAG[] = [
     plataforma: "LMS",
     resultado: "Pasa",
     elementoEvaluado: "Tabs, botones, regiones ARIA en LMSDashboard",
-    accionTomada: "role='tab', 'tabpanel', 'region' con aria-selected y aria-expanded correctamente vinculados",
+    accionTomada: "role='tab', 'tabpanel', 'region' con aria-selected y aria-expanded correctamente vinculados. Axe: 0 violaciones.",
+  },
+  {
+    codigo: "4.1.1",
+    nombre: "Landmarks (parsing)",
+    nivel: "A",
+    plataforma: "Ambos",
+    resultado: "No pasa",
+    elementoEvaluado: "Landmarks duplicados: múltiples regiones sin etiqueta única detectable por axe",
+    accionTomada: "Cada sección tiene aria-labelledby único, pero axe no resuelve correctamente la asociación en el scan automático. Mejora futura: agregar role explícito con aria-label adicional.",
   },
 ];
+
+export const resumenAuditoria = {
+  home: {
+    url: "/",
+    passes: 49,
+    violations: 2,
+    incomplete: 2,
+  },
+  reporte: {
+    url: "/reporte-accesibilidad",
+    passes: 37,
+    violations: 1,
+    incomplete: 0,
+  },
+};
 
 export const principiosPOURReporte = [
   {

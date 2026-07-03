@@ -81,7 +81,7 @@ export default function AdaptabilityDemo() {
   };
 
   const handleEnviar = () => {
-    if (!inputValor.trim() || reproduciendo) return;
+    if (!inputValor.trim()) return;
     const nuevoMsg: MensajeWhatsApp = {
       id: Date.now(),
       remitente: "usuario",
@@ -151,6 +151,7 @@ export default function AdaptabilityDemo() {
         formatoEntregado={perfil.formatoEntregado}
         descripcionFormato={perfil.descripcionFormato}
         inputValor={inputValor}
+        onInputChange={setInputValor}
         onEnviar={handleEnviar}
         escribiendo={escribiendo}
       />

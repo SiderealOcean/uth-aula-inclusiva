@@ -32,7 +32,7 @@ export default function ContextoSection() {
             >
               <h4 className="font-bold text-brand-700 mb-1">{p.grupo}</h4>
               <p className="text-sm text-gray-600 mb-1">{p.descripcion}</p>
-              <p className="text-xs text-gray-400">{p.estimacion}</p>
+              <p className="text-xs text-gray-500">{p.estimacion}</p>
             </div>
           ))}
         </div>

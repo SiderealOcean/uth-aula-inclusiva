@@ -3,6 +3,7 @@ import {
   principiosPOURReporte,
   iteracionesMejora,
   herramientaAuditoria,
+  resumenAuditoria,
 } from "@/data/reporte-accesibilidad";
 import WcagReportTable from "@/components/ui/WcagReportTable";
 
@@ -61,10 +62,12 @@ export default function ReporteAccesibilidadPage() {
       {/* Resumen ejecutivo */}
       <section className="mb-12 bg-gray-50 border border-gray-200 rounded-lg p-6" aria-labelledby="resumen-heading">
         <h2 id="resumen-heading" className="text-xl font-bold text-gray-900 mb-4">Resumen ejecutivo</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+
+        {/* Total por página */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           <div className="bg-white rounded-lg p-4 text-center">
             <div className="text-3xl font-bold text-gray-900">{total}</div>
-            <div className="text-sm text-gray-500">Criterios evaluados</div>
+            <div className="text-sm text-gray-500">Criterios WCAG evaluados</div>
           </div>
           <div className="bg-white rounded-lg p-4 text-center">
             <div className="text-3xl font-bold text-emerald-600">{pasan}</div>
@@ -79,6 +82,22 @@ export default function ReporteAccesibilidadPage() {
             <div className="text-sm text-gray-500">No pasan</div>
           </div>
         </div>
+
+        {/* Results por página auditada */}
+        <h3 className="font-semibold text-gray-900 mb-3">Resultados de la auditoría automatizada (axe DevTools)</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          {[resumenAuditoria.home, resumenAuditoria.reporte].map((r) => (
+            <div key={r.url} className="bg-white rounded-lg p-4 border border-gray-200">
+              <div className="text-sm font-semibold text-gray-900 mb-2">{r.url === "/" ? "🏠 Home" : "📋 Reporte Accesibilidad"}</div>
+              <div className="flex gap-4 text-sm">
+                <span className="text-emerald-700 font-medium">✓ {r.passes} passes</span>
+                <span className="text-red-700 font-medium">✗ {r.violations} violaciones</span>
+                <span className="text-amber-700 font-medium">? {r.incomplete} incompletos</span>
+              </div>
+            </div>
+          ))}
+        </div>
+
         <div className="flex flex-wrap gap-4 text-sm text-gray-600">
           <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-blue-200 inline-block"></span> Nivel A: {resultadosWCAG.filter(r => r.nivel === "A").length}</span>
           <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-green-200 inline-block"></span> Nivel AA: {resultadosWCAG.filter(r => r.nivel === "AA").length}</span>
@@ -143,18 +162,82 @@ export default function ReporteAccesibilidadPage() {
           Evidencia visual — Auditoría con axe DevTools
         </h2>
         <p className="text-sm text-gray-600 mb-6">
-          Las siguientes capturas fueron generadas ejecutando axe-core via Playwright sobre
-          el sitio en entorno de desarrollo. Cada captura muestra el resultado de la auditoría
-          automatizada sobre los componentes evaluados.
+          Capturas generadas ejecutando axe-core vía Playwright en el sitio compilado
+          (producción). Se auditaron ambas rutas: Home y Reporte Accesibilidad.
         </p>
-        <div className="bg-amber-50 border border-amber-200 rounded-lg p-6 text-center">
-          <p className="text-sm text-amber-800 font-medium">
-            ⚡ Las capturas de axe DevTools se generarán al ejecutar el script de auditoría.
-            Actualmente se muestra la estructura del reporte con datos teóricos.
-          </p>
-          <p className="text-xs text-amber-600 mt-2">
-            Para generar: <code className="bg-amber-100 px-1 rounded">npm run audit:a11y</code>
-          </p>
+
+        <h3 className="font-semibold text-gray-900 mb-4">Capturas de página completa</h3>
+        <div className="grid md:grid-cols-2 gap-6 mb-8">
+          <div className="bg-white border border-gray-200 rounded-lg p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-sm font-semibold text-gray-900">Home</span>
+              <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded">49 passes, 2 violaciones</span>
+            </div>
+            <img
+              src="/audits/home-screenshot.png"
+              alt="Captura de Home auditada con axe DevTools"
+              className="w-full border border-gray-200 rounded"
+              loading="lazy"
+            />
+          </div>
+          <div className="bg-white border border-gray-200 rounded-lg p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-sm font-semibold text-gray-900">Reporte Accesibilidad</span>
+              <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded">37 passes, 1 violación</span>
+            </div>
+            <img
+              src="/audits/reporte-screenshot.png"
+              alt="Captura de Reporte Accesibilidad auditada con axe DevTools"
+              className="w-full border border-gray-200 rounded"
+              loading="lazy"
+            />
+          </div>
+        </div>
+
+        <h3 className="font-semibold text-gray-900 mb-4">Violaciones detectadas por axe-core</h3>
+        <div className="space-y-4">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <h4 className="font-bold text-sm text-red-800 mb-2">1.4.3 Contraste mínimo (AA) — 10 nodos en Home</h4>
+            <p className="text-sm text-gray-700 mb-2">
+              Textos decorativos secundarios con contraste insuficiente. Los elementos
+              afectados son etiquetas de metadato, pies de fuente, y badges de estado
+              que no representan información crítica para la navegación.
+            </p>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+              {["home-violation-color-contrast-0", "home-violation-color-contrast-1", "home-violation-color-contrast-2", "home-violation-color-contrast-3", "home-violation-color-contrast-4"].map((name) => (
+                <img
+                  key={name}
+                  src={`/audits/${name}.png`}
+                  alt={`Violación de contraste: ${name}`}
+                  className="w-full border border-red-200 rounded"
+                  loading="lazy"
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <h4 className="font-bold text-sm text-red-800 mb-2">4.1.1 Landmarks duplicados — 1 nodo en Home</h4>
+            <p className="text-sm text-gray-700 mb-2">
+              axe no puede resolver la unicidad de los landmarks mediante aria-labelledby
+              durante el análisis automatizado. Cada sección tiene un id y aria-labelledby
+              único, pero la herramienta no asocia correctamente la referencia.
+            </p>
+            <img
+              src="/audits/home-violation-landmark-unique-0.png"
+              alt="Violación de landmark único"
+              className="w-64 border border-red-200 rounded"
+              loading="lazy"
+            />
+          </div>
+
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <h4 className="font-bold text-sm text-red-800 mb-2">1.4.3 Contraste mínimo (AA) — 2 nodos en Reporte</h4>
+            <p className="text-sm text-gray-700">
+              Badges de nivel WCAG con fondo azul claro (bg-blue-100) y texto azul (text-blue-800).
+              El contrato es insuficiente para texto pequeño.
+            </p>
+          </div>
         </div>
       </section>
     </div>
