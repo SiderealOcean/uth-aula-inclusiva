@@ -10,6 +10,7 @@
     "audit:a11y": "node scripts/audit-a11y.mjs"
   },
   "dependencies": {
+    "docx": "^8.5.0",
     "next": "14.2.35",
     "react": "^18",
     "react-dom": "^18"
