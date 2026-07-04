@@ -1,5 +1,6 @@
 import PhaseIndicator from "@/components/layout/PhaseIndicator";
 import HeroSection from "@/components/sections/HeroSection";
+import LeanCanvasSection from "@/components/sections/LeanCanvasSection";
 import ContextoSection from "@/components/sections/ContextoSection";
 import SolucionSection from "@/components/sections/SolucionSection";
 import DemoWhatsAppSection from "@/components/sections/DemoWhatsAppSection";
@@ -18,6 +19,7 @@ export default function Home() {
 
       {/* Fase 01 */}
       <HeroSection />
+      <LeanCanvasSection />
       <ContextoSection />
 
       {/* Fase 02 */}
