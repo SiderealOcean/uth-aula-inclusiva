@@ -8,6 +8,7 @@ export default function Header() {
 
   const tabs = [
     { href: "/", label: "Home" },
+    { href: "/informe", label: "Informe" },
     { href: "/reporte-accesibilidad", label: "Reporte Accesibilidad" },
   ];
 
