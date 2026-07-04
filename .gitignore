@@ -31,6 +31,12 @@ yarn-error.log*
 # vercel
 .vercel
 
+# opencode local config (contains personal DevPenpot tokens)
+/opencode.jsonc
+
+# opencode superpowers working files
+/docs/superpowers/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
