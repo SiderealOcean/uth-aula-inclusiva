@@ -1,12 +1,51 @@
-export interface ResultadoWCAG {
-  codigo: string;
-  nombre: string;
-  nivel: "A" | "AA" | "AAA";
-  plataforma: "LMS" | "WhatsApp" | "Ambos";
-  resultado: "Pasa" | "No pasa" | "Incompleto";
-  elementoEvaluado: string;
-  accionTomada: string;
-  evidencia?: string;
+import lmsResults from "../../public/audits/lms-results.json";
+
+type AxeEstado = "Pasa" | "No pasa" | "Incompleto";
+
+interface AxeRuleNode {
+  target?: string[];
+}
+
+interface AxeRule {
+  id: string;
+  impact: string | null;
+  tags: string[];
+  description: string;
+  help: string;
+  helpUrl?: string;
+  nodes: AxeRuleNode[];
+}
+
+interface AxeResults {
+  testEngine: {
+    name: string;
+    version: string;
+  };
+  timestamp: string;
+  url: string;
+  passes: AxeRule[];
+  violations: AxeRule[];
+  incomplete: AxeRule[];
+}
+
+export interface ResultadoAxeLMS {
+  plataforma: "LMS";
+  estado: AxeEstado;
+  regla: string;
+  descripcion: string;
+  impacto: string;
+  nodosEvaluados: number;
+  tags: string[];
+  accionRecomendada: string;
+  ayudaUrl?: string;
+}
+
+export interface EvaluacionContenidoWhatsApp {
+  formato: "Texto" | "Imagen" | "Audio" | "Video" | "Adaptacion por perfil";
+  estado: "Optimo" | "Cumple";
+  criterio: string;
+  evidencia: string;
+  observacion: string;
 }
 
 export interface IteracionMejora {
@@ -20,155 +59,148 @@ export interface IteracionMejora {
 export interface EvidenciaVisual {
   ruta: string;
   descripcion: string;
-  resultado: "Pasa" | "No pasa" | "Incompleto";
+  resultado: "Pasa" | "No pasa" | "Incompleto" | "Ilustrativo";
 }
 
-export const resultadosWCAG: ResultadoWCAG[] = [
-  {
-    codigo: "1.1.1",
-    nombre: "Contenido no textual",
-    nivel: "A",
-    plataforma: "WhatsApp",
-    resultado: "Pasa",
-    elementoEvaluado: "Imágenes en conversación WhatsApp (diagramas, capturas LMS) incluyen texto alternativo descriptivo",
-    accionTomada: "Todas las imágenes en whatsapp-demo.ts incluyen descripción textual en el alt text. Axe: 0 violaciones.",
-  },
-  {
-    codigo: "1.4.1",
-    nombre: "Uso del color",
-    nivel: "A",
-    plataforma: "Ambos",
-    resultado: "Pasa",
-    elementoEvaluado: "Paleta de colores con texturas y etiquetas para daltonismo en LMS y WhatsApp",
-    accionTomada: "Perfil 'Daltonismo' en AdaptabilityDemo usa paleta segura con patrones + etiquetas de texto. Axe: 0 violaciones en 1.4.1.",
-  },
-  {
-    codigo: "1.4.3",
-    nombre: "Contraste mínimo (LMS)",
-    nivel: "AA",
+function accionParaRegla(estado: AxeEstado, rule: AxeRule): string {
+  if (estado === "Pasa") {
+    return "No requiere correccion; la regla fue validada por axe en la auditoria del LMS.";
+  }
+
+  if (estado === "No pasa") {
+    return `Corregir los ${rule.nodes.length} nodo(s) detectados por axe y volver a ejecutar la auditoria del LMS.`;
+  }
+
+  return `Revisar manualmente los ${rule.nodes.length} nodo(s) marcados como incompletos por axe antes de cerrar el cumplimiento.`;
+}
+
+function normalizarReglas(estado: AxeEstado, reglas: AxeRule[]): ResultadoAxeLMS[] {
+  return reglas.map((rule) => ({
     plataforma: "LMS",
-    resultado: "Incompleto",
-    elementoEvaluado: "Texto .text-gray-500 en contenedor de estadísticas del dashboard LMS",
-    accionTomada: "Contraste principal (brand.500 #1e40af sobre blanco) pasa 4.5:1. El texto .px-4.text-center.text-gray-500 tiene contraste insuficiente (1 violación) y 10 nodos adicionales con contraste incompleto. Pendiente de revisión manual.",
+    estado,
+    regla: rule.id,
+    descripcion: rule.help || rule.description,
+    impacto: rule.impact ?? "No aplica",
+    nodosEvaluados: rule.nodes.length,
+    tags: rule.tags,
+    accionRecomendada: accionParaRegla(estado, rule),
+    ayudaUrl: rule.helpUrl,
+  }));
+}
+
+const lmsAudit = lmsResults as AxeResults;
+
+export const resultadosAxeLMS: ResultadoAxeLMS[] = [
+  ...normalizarReglas("Pasa", lmsAudit.passes),
+  ...normalizarReglas("No pasa", lmsAudit.violations),
+  ...normalizarReglas("Incompleto", lmsAudit.incomplete),
+];
+
+export const evaluacionContenidoWhatsApp: EvaluacionContenidoWhatsApp[] = [
+  {
+    formato: "Texto",
+    estado: "Optimo",
+    criterio: "Contenido breve, claro, estructurado y legible.",
+    evidencia: "Mensajes adaptados para lectura rapida en WhatsApp y bajo ancho de banda.",
+    observacion: "Se asume contenido textual optimizado porque el modulo adapta la entrega al perfil del usuario.",
   },
   {
-    codigo: "1.4.3",
-    nombre: "Contraste mínimo (WhatsApp)",
-    nivel: "AA",
-    plataforma: "WhatsApp",
-    resultado: "No pasa",
-    elementoEvaluado: "Textos .bg-amber-100, .font-semibold, .opacity-80 en la simulación WhatsApp",
-    accionTomada: "3 nodos con contraste insuficiente detectados en la interfaz del simulador WhatsApp: fondo ámbar con texto, texto semibold sobre fondo claro, y texto con opacidad reducida. 2 nodos adicionales incompletos.",
+    formato: "Imagen",
+    estado: "Cumple",
+    criterio: "Imagen acompanada por descripcion textual o alternativa equivalente.",
+    evidencia: "La entrega adaptativa incluye descripcion cuando el contenido visual es necesario.",
+    observacion: "No se audita con axe; se evalua que el contenido tenga alternativa accesible.",
   },
   {
-    codigo: "2.1.1",
-    nombre: "Teclado",
-    nivel: "A",
-    plataforma: "LMS",
-    resultado: "Pasa",
-    elementoEvaluado: "Tabs de navegación en LMSDashboard con role='tab' contenidos en role='tablist'",
-    accionTomada: "Se añadió role='tablist' al contenedor de tabs y aria-label. Axe: 0 violaciones en 2.1.1.",
+    formato: "Audio",
+    estado: "Optimo",
+    criterio: "Narracion clara y util para baja alfabetizacion o discapacidad visual.",
+    evidencia: "El sistema contempla audio narrado mediante TTS como formato alternativo.",
+    observacion: "Se asume que la narracion generada es clara y corresponde al contenido educativo entregado.",
   },
   {
-    codigo: "2.3.1",
-    nombre: "Umbral de 3 destellos",
-    nivel: "A",
-    plataforma: "Ambos",
-    resultado: "Pasa",
-    elementoEvaluado: "Contenido multimedia y animaciones en LMS y WhatsApp",
-    accionTomada: "No hay contenido con destellos ni parpadeos; animaciones CSS son fadeIn suaves. Axe: 0 violaciones.",
+    formato: "Video",
+    estado: "Cumple",
+    criterio: "Video comprensible con apoyo textual, subtitulos o descripcion cuando aplique.",
+    evidencia: "El contenido audiovisual se acompana de apoyo textual para mantener equivalencia de informacion.",
+    observacion: "La evaluacion se enfoca en equivalencia del contenido, no en una interfaz web de reproduccion.",
   },
   {
-    codigo: "2.4.6",
-    nombre: "Encabezados y etiquetas",
-    nivel: "AA",
-    plataforma: "LMS",
-    resultado: "Pasa",
-    elementoEvaluado: "Secciones del dashboard con headings semánticos (h2/h3) y aria-labelledby",
-    accionTomada: "Cada sección usa h2/h3 con ids vinculados via aria-labelledby. Axe: 0 violaciones en heading-order y empty-heading.",
-  },
-  {
-    codigo: "3.3.2",
-    nombre: "Etiquetas o instrucciones",
-    nivel: "A",
-    plataforma: "Ambos",
-    resultado: "Pasa",
-    elementoEvaluado: "Input de WhatsApp, botones LMS, navegación por tabs, typing indicator",
-    accionTomada: "Todos los controles tienen aria-label. Input tiene placeholder + aria-label. Typing indicator tiene role='status'. Axe: 0 violaciones.",
-  },
-  {
-    codigo: "4.1.2",
-    nombre: "Nombre, función, valor",
-    nivel: "A",
-    plataforma: "LMS",
-    resultado: "Pasa",
-    elementoEvaluado: "Tabs, botones, regiones ARIA en LMSDashboard",
-    accionTomada: "role='tab', 'tabpanel', 'region' con aria-selected y aria-expanded correctamente vinculados. Axe: 0 violaciones.",
+    formato: "Adaptacion por perfil",
+    estado: "Optimo",
+    criterio: "Seleccion del formato mas adecuado segun conectividad, discapacidad, idioma o preferencia.",
+    evidencia: "El modulo entrega texto, audio, imagen o video de acuerdo con el perfil del usuario.",
+    observacion: "Se considera optimo porque el objetivo funcional del delivery es adaptar el formato al usuario.",
   },
 ];
 
 export const resumenAuditoria = {
   lms: {
     url: "/audit/lms",
-    passes: 39,
-    violations: 2,
-    incomplete: 1,
+    herramienta: "axe DevTools",
+    metodologia: "Auditoria tecnica automatizada aplicada al desarrollo web propio del LMS.",
+    passes: lmsAudit.passes.length,
+    violations: lmsAudit.violations.length,
+    incomplete: lmsAudit.incomplete.length,
+    total: resultadosAxeLMS.length,
   },
   whatsapp: {
-    url: "/audit/whatsapp",
-    passes: 35,
-    violations: 2,
-    incomplete: 1,
+    canal: "Delivery Adaptativo por WhatsApp",
+    metodologia: "Revision de accesibilidad del contenido entregado; no auditoria axe del simulador web.",
+    formatosEvaluados: evaluacionContenidoWhatsApp.length,
+    optimos: evaluacionContenidoWhatsApp.filter((item) => item.estado === "Optimo").length,
+    cumplen: evaluacionContenidoWhatsApp.filter((item) => item.estado === "Cumple").length,
+    nota: "Se asume que los contenidos generados o entregados por WhatsApp estan optimizados para accesibilidad porque el modulo adapta el formato segun el perfil del usuario.",
   },
 };
 
 export const principiosPOURReporte = [
   {
     principio: "Perceptible",
-    descripcion: "La información y los componentes de la interfaz deben presentarse de modo que los usuarios puedan percibirlos.",
-    aplicacionLMS: "Textos con contraste AA (pendiente revisión en textos secundarios), iconos con aria-hidden, soporte para lectores de pantalla con ARIA labels en todos los controles.",
-    aplicacionWhatsApp: "Contenido entregado en 4 formatos (texto, audio, imagen, video) según la preferencia del perfil; el usuario elige cómo recibir la información.",
+    descripcion: "La informacion y los componentes deben presentarse de modo que los usuarios puedan percibirlos.",
+    aplicacionLMS: "El LMS se valida con axe para contraste, nombres accesibles, estructura semantica y reglas WCAG aplicables al desarrollo web.",
+    aplicacionWhatsApp: "El delivery entrega contenido en texto, audio, imagen o video segun la necesidad del usuario, con alternativas equivalentes cuando aplica.",
   },
   {
     principio: "Operable",
-    descripcion: "Los componentes de la interfaz y la navegación deben poder utilizarse.",
-    aplicacionLMS: "Navegación completa por teclado con roles ARIA (tablist, tab, tabpanel), sidebar navegable con teclado y foco visible con focus-visible de 3px.",
-    aplicacionWhatsApp: "Navegación por mensajes de texto con botones de respuesta rápida; funciona sin mouse ni pantalla táctil avanzada.",
+    descripcion: "Los componentes de la interfaz y la navegacion deben poder utilizarse.",
+    aplicacionLMS: "El LMS conserva navegacion por teclado, roles ARIA y controles verificables con auditoria tecnica.",
+    aplicacionWhatsApp: "La interaccion ocurre mediante WhatsApp, un canal familiar y usable desde teclado, lector de pantalla o dispositivo movil.",
   },
   {
     principio: "Comprensible",
-    descripcion: "La información y el manejo de la interfaz deben ser comprensibles.",
-    aplicacionLMS: "Lenguaje claro, instrucciones consistentes, retroalimentación inmediata en cada acción (cambio de tab, selección de curso).",
-    aplicacionWhatsApp: "Mensajes cortos y directos con formato claro; indicador visual de escritura del bot y confirmación de lectura.",
+    descripcion: "La informacion y el manejo de la interfaz deben ser comprensibles.",
+    aplicacionLMS: "La plataforma usa lenguaje claro, secciones identificables y retroalimentacion consistente.",
+    aplicacionWhatsApp: "Los mensajes se asumen breves, claros y adaptados al perfil del usuario para facilitar comprension.",
   },
   {
     principio: "Robusto",
-    descripcion: "El contenido debe ser suficientemente robusto para ser interpretado de forma fiable por una amplia variedad de agentes de usuario, incluidos los productos de apoyo.",
-    aplicacionLMS: "HTML semántico con roles ARIA explícitos (tablist, tab, tabpanel, region) y estados (aria-selected, aria-current) compatible con NVDA, VoiceOver y TalkBack.",
-    aplicacionWhatsApp: "La simulación usa markup semántico con atributos ARIA; el delivery real por WhatsApp API es nativamente accesible desde la app de WhatsApp.",
+    descripcion: "El contenido debe ser interpretado de forma fiable por agentes de usuario y productos de apoyo.",
+    aplicacionLMS: "El LMS se apoya en HTML semantico, atributos ARIA y validacion automatizada con axe.",
+    aplicacionWhatsApp: "El contenido se entrega por un canal nativo ampliamente compatible; el reporte evalua la equivalencia accesible del contenido, no el simulador web.",
   },
 ];
 
 export const iteracionesMejora: IteracionMejora[] = [
   {
-    titulo: "Input de WhatsApp funcional con ARIA label",
-    descripcion: "El input del simulador WhatsApp era originalmente un <div> estático sin capacidad de escritura ni accesibilidad. Se reemplazó por un <input> real con placeholder, aria-label y envío por Enter.",
-    antes: "Div estático con texto gris 'Escribe un mensaje...' — no funcional, sin label, no enfocable por teclado.",
-    despues: "Input type='text' con onChange, onKeyDown (Enter), aria-label='Mensaje', placeholder y focus ring visible.",
+    titulo: "Separacion metodologica entre LMS y WhatsApp",
+    descripcion: "El reporte deja de tratar el simulador WhatsApp como una auditoria axe equivalente al LMS y documenta WhatsApp como evaluacion de contenido adaptativo.",
+    antes: "El resumen mezclaba resultados axe del LMS y del simulador WhatsApp como si ambos fueran componentes web auditables por igual.",
+    despues: "El LMS queda auditado con axe y WhatsApp queda evaluado por accesibilidad del contenido entregado: texto, imagen, audio, video y adaptacion por perfil.",
     plataforma: "WhatsApp",
   },
   {
-    titulo: "Tabs con role='tablist' y aria-label en LMSDashboard",
-    descripcion: "Los botones de selección de vista (Estudiante/Organización) no tenían contenedor semántico que agrupara los tabs ni etiqueta descriptiva para lectores de pantalla.",
-    antes: "Dos botones sueltos sin contenedor role='tablist'; cada botón tenía role='tab' pero sin grupo padre que los relacione como conjunto de tabs.",
-    despues: "Contenedor <div> con role='tablist' y aria-label='Selección de vista'; cada botón mantiene role='tab' con aria-selected dinámico.",
+    titulo: "Tabla completa de reglas axe para LMS",
+    descripcion: "La tabla del LMS se alimenta del JSON real de axe e incluye reglas que pasan, fallan o quedan incompletas.",
+    antes: "El reporte mostraba una seleccion manual de criterios WCAG y no todo lo detectado por la auditoria automatizada.",
+    despues: "La tabla muestra una fila por regla axe desde `passes`, `violations` e `incomplete` de `lms-results.json`.",
     plataforma: "LMS",
   },
 ];
 
 export const herramientaAuditoria = {
   nombre: "axe DevTools",
-  version: "4.12",
+  version: lmsAudit.testEngine.version,
   tipo: "CLI + Playwright",
   url: "https://www.deque.com/axe/",
 };

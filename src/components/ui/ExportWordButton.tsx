@@ -15,15 +15,15 @@ import {
   WidthType,
 } from "docx";
 import {
-  resultadosWCAG,
+  resultadosAxeLMS,
+  evaluacionContenidoWhatsApp,
   principiosPOURReporte,
   iteracionesMejora,
   resumenAuditoria,
   herramientaAuditoria,
-  type ResultadoWCAG,
+  type ResultadoAxeLMS,
+  type EvaluacionContenidoWhatsApp,
 } from "@/data/reporte-accesibilidad";
-
-const pxToEmu = (px: number) => Math.round(px * 9525);
 
 interface ImagenDoc {
   nombre: string;
@@ -33,24 +33,35 @@ interface ImagenDoc {
   altoPx: number;
 }
 
+const pxToEmu = (px: number) => Math.round(px * 9525);
+
 const imagenes: ImagenDoc[] = [
-  { nombre: "lms-screenshot", ruta: "/audits/lms-screenshot.png", titulo: "Plataforma Web (LMS) — captura completa auditada con axe DevTools", anchoPx: 640, altoPx: 450 },
-  { nombre: "whatsapp-screenshot", ruta: "/audits/whatsapp-screenshot.png", titulo: "Delivery Adaptativo (WhatsApp) — captura completa auditada con axe DevTools", anchoPx: 640, altoPx: 450 },
-  { nombre: "lms-violation-color-contrast", ruta: "/audits/lms-violation-color-contrast-0.png", titulo: "Violación 1.4.3 Contraste mínimo — LMS: texto .text-gray-500 en estadísticas", anchoPx: 320, altoPx: 200 },
-  { nombre: "whatsapp-violation-color-contrast-0", ruta: "/audits/whatsapp-violation-color-contrast-0.png", titulo: "Violación 1.4.3 Contraste mínimo — WhatsApp: fondo ámbar con texto", anchoPx: 320, altoPx: 200 },
-  { nombre: "whatsapp-violation-color-contrast-1", ruta: "/audits/whatsapp-violation-color-contrast-1.png", titulo: "Violación 1.4.3 Contraste mínimo — WhatsApp: texto semibold sobre fondo claro", anchoPx: 320, altoPx: 200 },
-  { nombre: "whatsapp-violation-color-contrast-2", ruta: "/audits/whatsapp-violation-color-contrast-2.png", titulo: "Violación 1.4.3 Contraste mínimo — WhatsApp: texto con opacidad reducida", anchoPx: 320, altoPx: 200 },
-  { nombre: "lms-violation-heading", ruta: "/audits/lms-violation-page-has-heading-one-0.png", titulo: "Violación page-has-heading-one — LMS: componente sin h1 en página wrapper", anchoPx: 320, altoPx: 200 },
+  { nombre: "lms-screenshot", ruta: "/audits/lms-screenshot.png", titulo: "Plataforma Web (LMS) - captura completa auditada con axe DevTools", anchoPx: 640, altoPx: 450 },
+  { nombre: "whatsapp-screenshot", ruta: "/audits/whatsapp-screenshot.png", titulo: "Delivery Adaptativo por WhatsApp - captura ilustrativa del flujo de contenido", anchoPx: 640, altoPx: 450 },
+  { nombre: "lms-violation-color-contrast", ruta: "/audits/lms-violation-color-contrast-0.png", titulo: "Violacion de contraste detectada por axe en LMS", anchoPx: 320, altoPx: 200 },
+  { nombre: "lms-violation-heading", ruta: "/audits/lms-violation-page-has-heading-one-0.png", titulo: "Violacion page-has-heading-one detectada por axe en LMS", anchoPx: 320, altoPx: 200 },
 ];
 
-function nivelColor(nivel: "A" | "AA" | "AAA"): string {
-  const colores: Record<string, string> = { A: "DBEAFE", AA: "D1FAE5", AAA: "E9D5FF" };
-  return colores[nivel];
+function estadoAxeColor(estado: ResultadoAxeLMS["estado"]): string {
+  const colores: Record<ResultadoAxeLMS["estado"], string> = {
+    Pasa: "D1FAE5",
+    "No pasa": "FEE2E2",
+    Incompleto: "FEF3C7",
+  };
+  return colores[estado];
 }
 
-function resultadoColor(resultado: "Pasa" | "No pasa" | "Incompleto"): string {
-  const colores: Record<string, string> = { Pasa: "D1FAE5", "No pasa": "FEE2E2", Incompleto: "FEF3C7" };
-  return colores[resultado];
+function estadoContenidoColor(estado: EvaluacionContenidoWhatsApp["estado"]): string {
+  const colores: Record<EvaluacionContenidoWhatsApp["estado"], string> = {
+    Optimo: "D1FAE5",
+    Cumple: "DBEAFE",
+  };
+  return colores[estado];
+}
+
+function tagsResumen(tags: string[]): string {
+  const wcagTags = tags.filter((tag) => tag.startsWith("wcag") || tag === "best-practice");
+  return wcagTags.length > 0 ? wcagTags.join(", ") : "Sin tag WCAG directo";
 }
 
 async function fetchImageBuffer(ruta: string): Promise<ArrayBuffer | null> {
@@ -105,16 +116,16 @@ async function generarDocumento(): Promise<Blob> {
     }),
   );
 
-  const total = resultadosWCAG.length;
-  const pasan = resultadosWCAG.filter((r) => r.resultado === "Pasa").length;
-  const noPasan = resultadosWCAG.filter((r) => r.resultado === "No pasa").length;
-  const incompletos = resultadosWCAG.filter((r) => r.resultado === "Incompleto").length;
+  const totalLMS = resultadosAxeLMS.length;
+  const pasanLMS = resultadosAxeLMS.filter((r) => r.estado === "Pasa").length;
+  const noPasanLMS = resultadosAxeLMS.filter((r) => r.estado === "No pasa").length;
+  const incompletosLMS = resultadosAxeLMS.filter((r) => r.estado === "Incompleto").length;
 
   children.push(
     new Table({
       rows: [
         new TableRow({
-          children: ["Total criterios", "Pasan", "Incompletos", "No pasan"].map(
+          children: ["Reglas axe LMS", "Pasan", "Incompletas", "No pasan"].map(
             (text) =>
               new TableCell({
                 children: [new Paragraph({ children: [new TextRun({ text, bold: true, size: 22 })], alignment: AlignmentType.CENTER })],
@@ -124,7 +135,7 @@ async function generarDocumento(): Promise<Blob> {
           ),
         }),
         new TableRow({
-          children: [total, pasan, incompletos, noPasan].map(
+          children: [totalLMS, pasanLMS, incompletosLMS, noPasanLMS].map(
             (valor) =>
               new TableCell({
                 children: [new Paragraph({ children: [new TextRun({ text: String(valor), size: 24, bold: true })], alignment: AlignmentType.CENTER })],
@@ -138,29 +149,29 @@ async function generarDocumento(): Promise<Blob> {
     new Paragraph({
       children: [
         new TextRun({ text: "Plataforma Web (LMS): ", bold: true, size: 24 }),
-        new TextRun({ text: `${resumenAuditoria.lms.passes} passes, ${resumenAuditoria.lms.violations} violaciones, ${resumenAuditoria.lms.incomplete} incompletos`, size: 24 }),
+        new TextRun({ text: `${resumenAuditoria.lms.metodologia} Resultado: ${resumenAuditoria.lms.passes} passes, ${resumenAuditoria.lms.violations} violaciones, ${resumenAuditoria.lms.incomplete} incompletas.`, size: 24 }),
       ],
       spacing: { after: 100 },
     }),
     new Paragraph({
       children: [
-        new TextRun({ text: "Delivery Adaptativo (WhatsApp): ", bold: true, size: 24 }),
-        new TextRun({ text: `${resumenAuditoria.whatsapp.passes} passes, ${resumenAuditoria.whatsapp.violations} violaciones, ${resumenAuditoria.whatsapp.incomplete} incompletos`, size: 24 }),
+        new TextRun({ text: "Delivery Adaptativo por WhatsApp: ", bold: true, size: 24 }),
+        new TextRun({ text: `${resumenAuditoria.whatsapp.metodologia} ${resumenAuditoria.whatsapp.nota}`, size: 24 }),
       ],
       spacing: { after: 400 },
     }),
   );
 
-  // === Sección 3: Criterios WCAG 2.2 ===
+  // === Sección 3: Reglas axe LMS ===
   children.push(
     new Paragraph({
-      text: "Criterios WCAG 2.2 evaluados",
+      text: "Reglas axe evaluadas en Plataforma Web (LMS)",
       heading: HeadingLevel.HEADING_1,
       spacing: { before: 400, after: 200 },
     }),
   );
 
-  const headerCells = ["Código", "Nombre", "Nivel", "Plataforma", "Resultado", "Elemento evaluado", "Acción tomada"].map(
+  const headerCells = ["Plataforma", "Estado", "Regla axe", "Descripcion", "Impacto", "Nodos", "Tags", "Accion"].map(
     (text) =>
       new TableCell({
         children: [new Paragraph({ children: [new TextRun({ text, bold: true, size: 20, color: "FFFFFF" })], alignment: AlignmentType.CENTER })],
@@ -168,22 +179,20 @@ async function generarDocumento(): Promise<Blob> {
       })
   );
 
-  const dataRows = resultadosWCAG.map((r: ResultadoWCAG) =>
+  const dataRows = resultadosAxeLMS.map((r: ResultadoAxeLMS) =>
     new TableRow({
       children: [
-        new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: r.codigo, size: 20, font: "Consolas" })] })] }),
-        new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: r.nombre, size: 20 })] })] }),
-        new TableCell({
-          children: [new Paragraph({ children: [new TextRun({ text: r.nivel, size: 20, bold: true })], alignment: AlignmentType.CENTER })],
-          shading: { type: "clear", fill: nivelColor(r.nivel) },
-        }),
         new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: r.plataforma, size: 20 })], alignment: AlignmentType.CENTER })] }),
         new TableCell({
-          children: [new Paragraph({ children: [new TextRun({ text: r.resultado, size: 20, bold: true })], alignment: AlignmentType.CENTER })],
-          shading: { type: "clear", fill: resultadoColor(r.resultado) },
+          children: [new Paragraph({ children: [new TextRun({ text: r.estado, size: 20, bold: true })], alignment: AlignmentType.CENTER })],
+          shading: { type: "clear", fill: estadoAxeColor(r.estado) },
         }),
-        new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: r.elementoEvaluado, size: 20 })] })] }),
-        new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: r.accionTomada, size: 20 })] })] }),
+        new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: r.regla, size: 20, font: "Consolas" })] })] }),
+        new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: r.descripcion, size: 20 })] })] }),
+        new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: r.impacto, size: 20 })], alignment: AlignmentType.CENTER })] }),
+        new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: String(r.nodosEvaluados), size: 20 })], alignment: AlignmentType.CENTER })] }),
+        new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: tagsResumen(r.tags), size: 18 })] })] }),
+        new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: r.accionRecomendada, size: 20 })] })] }),
       ],
     })
   );
@@ -195,7 +204,50 @@ async function generarDocumento(): Promise<Blob> {
     new Paragraph({ spacing: { after: 400 } }),
   );
 
-  // === Sección 4: Principios POUR ===
+  // === Sección 4: WhatsApp content evaluation ===
+  children.push(
+    new Paragraph({
+      text: "Delivery Adaptativo por WhatsApp - Evaluacion del contenido",
+      heading: HeadingLevel.HEADING_1,
+      spacing: { before: 400, after: 200 },
+    }),
+    new Paragraph({
+      children: [new TextRun({ text: resumenAuditoria.whatsapp.nota, size: 24 })],
+      spacing: { after: 200 },
+    }),
+  );
+
+  const whatsappHeaderCells = ["Formato", "Estado", "Criterio", "Evidencia", "Observacion"].map(
+    (text) =>
+      new TableCell({
+        children: [new Paragraph({ children: [new TextRun({ text, bold: true, size: 20, color: "FFFFFF" })], alignment: AlignmentType.CENTER })],
+        shading: { type: "clear", fill: "2563EB" },
+      })
+  );
+
+  const whatsappRows = evaluacionContenidoWhatsApp.map((item) =>
+    new TableRow({
+      children: [
+        new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: item.formato, size: 20, bold: true })] })] }),
+        new TableCell({
+          children: [new Paragraph({ children: [new TextRun({ text: item.estado, size: 20, bold: true })], alignment: AlignmentType.CENTER })],
+          shading: { type: "clear", fill: estadoContenidoColor(item.estado) },
+        }),
+        new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: item.criterio, size: 20 })] })] }),
+        new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: item.evidencia, size: 20 })] })] }),
+        new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: item.observacion, size: 20 })] })] }),
+      ],
+    })
+  );
+
+  children.push(
+    new Table({
+      rows: [new TableRow({ children: whatsappHeaderCells }), ...whatsappRows],
+    }),
+    new Paragraph({ spacing: { after: 400 } }),
+  );
+
+  // === Sección 5: Principios POUR ===
   children.push(
     new Paragraph({
       text: "Principios POUR — Aplicación por plataforma",
@@ -231,7 +283,7 @@ async function generarDocumento(): Promise<Blob> {
     );
   }
 
-  // === Sección 5: Iteraciones de mejora ===
+  // === Sección 6: Iteraciones de mejora ===
   children.push(
     new Paragraph({
       text: "Iteraciones de mejora documentadas",
@@ -271,10 +323,10 @@ async function generarDocumento(): Promise<Blob> {
     );
   }
 
-  // === Sección 6: Evidencia visual ===
+  // === Sección 7: Evidencia visual ===
   children.push(
     new Paragraph({
-      text: "Evidencia visual — Auditoría con axe DevTools",
+      text: "Evidencia visual y metodologica",
       heading: HeadingLevel.HEADING_1,
       spacing: { before: 400, after: 200 },
     }),

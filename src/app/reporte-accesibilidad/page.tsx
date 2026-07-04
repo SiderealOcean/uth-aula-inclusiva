@@ -1,5 +1,6 @@
 import {
-  resultadosWCAG,
+  resultadosAxeLMS,
+  evaluacionContenidoWhatsApp,
   principiosPOURReporte,
   iteracionesMejora,
   herramientaAuditoria,
@@ -7,6 +8,7 @@ import {
 } from "@/data/reporte-accesibilidad";
 import Image from "next/image";
 import WcagReportTable from "@/components/ui/WcagReportTable";
+import WhatsAppContentReportTable from "@/components/ui/WhatsAppContentReportTable";
 import ExportWordButton from "@/components/ui/ExportWordButton";
 
 function POURCard({
@@ -39,10 +41,10 @@ function POURCard({
 }
 
 export default function ReporteAccesibilidadPage() {
-  const total = resultadosWCAG.length;
-  const pasan = resultadosWCAG.filter((r) => r.resultado === "Pasa").length;
-  const noPasan = resultadosWCAG.filter((r) => r.resultado === "No pasa").length;
-  const incompletos = resultadosWCAG.filter((r) => r.resultado === "Incompleto").length;
+  const totalLMS = resultadosAxeLMS.length;
+  const pasanLMS = resultadosAxeLMS.filter((r) => r.estado === "Pasa").length;
+  const noPasanLMS = resultadosAxeLMS.filter((r) => r.estado === "No pasa").length;
+  const incompletosLMS = resultadosAxeLMS.filter((r) => r.estado === "Incompleto").length;
 
   return (
     <div className="pt-32 pb-20 px-6 max-w-7xl mx-auto">
@@ -58,9 +60,10 @@ export default function ReporteAccesibilidadPage() {
           <ExportWordButton />
         </div>
         <p className="text-gray-600 max-w-3xl">
-          Evaluación técnica basada en WCAG 2.2 aplicada a los dos componentes principales
-          del proyecto: la Plataforma Web (LMS) y el Delivery Adaptativo por WhatsApp.
-          Herramienta utilizada: <strong>{herramientaAuditoria.nombre} v{herramientaAuditoria.version}</strong> ({herramientaAuditoria.tipo}).
+          Reporte integral con dos metodologias: auditoria tecnica automatizada con{" "}
+          <strong>{herramientaAuditoria.nombre} v{herramientaAuditoria.version}</strong>{" "}
+          para la Plataforma Web (LMS), y revision de accesibilidad del contenido
+          entregado por el Delivery Adaptativo por WhatsApp.
         </p>
       </section>
 
@@ -68,57 +71,78 @@ export default function ReporteAccesibilidadPage() {
       <section className="mb-12 bg-gray-50 border border-gray-200 rounded-lg p-6" aria-labelledby="resumen-heading">
         <h2 id="resumen-heading" className="text-xl font-bold text-gray-900 mb-4">Resumen ejecutivo</h2>
 
-        {/* Total por página */}
+        <p className="text-sm text-gray-600 mb-6">
+          El LMS se evalua con axe porque es desarrollo web propio. WhatsApp se evalua
+          por la accesibilidad del contenido entregado, no por el simulador web usado
+          para demostrar el flujo.
+        </p>
+
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           <div className="bg-white rounded-lg p-4 text-center">
-            <div className="text-3xl font-bold text-gray-900">{total}</div>
-            <div className="text-sm text-gray-500">Criterios WCAG evaluados</div>
+            <div className="text-3xl font-bold text-gray-900">{totalLMS}</div>
+            <div className="text-sm text-gray-500">Reglas axe LMS</div>
           </div>
           <div className="bg-white rounded-lg p-4 text-center">
-            <div className="text-3xl font-bold text-emerald-600">{pasan}</div>
+            <div className="text-3xl font-bold text-emerald-600">{pasanLMS}</div>
             <div className="text-sm text-gray-500">Pasan</div>
           </div>
           <div className="bg-white rounded-lg p-4 text-center">
-            <div className="text-3xl font-bold text-amber-600">{incompletos}</div>
-            <div className="text-sm text-gray-500">Incompletos</div>
+            <div className="text-3xl font-bold text-amber-600">{incompletosLMS}</div>
+            <div className="text-sm text-gray-500">Incompletas</div>
           </div>
           <div className="bg-white rounded-lg p-4 text-center">
-            <div className="text-3xl font-bold text-red-600">{noPasan}</div>
+            <div className="text-3xl font-bold text-red-600">{noPasanLMS}</div>
             <div className="text-sm text-gray-500">No pasan</div>
           </div>
         </div>
 
-        {/* Results por página auditada */}
-        <h3 className="font-semibold text-gray-900 mb-3">Resultados de la auditoría automatizada (axe DevTools)</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          {[resumenAuditoria.lms, resumenAuditoria.whatsapp].map((r) => (
-            <div key={r.url} className="bg-white rounded-lg p-4 border border-gray-200">
-              <div className="text-sm font-semibold text-gray-900 mb-2">{r.url === "/audit/lms" ? "🖥️ Plataforma Web (LMS)" : "📱 Delivery Adaptativo por WhatsApp"}</div>
-              <div className="flex gap-4 text-sm">
-                <span className="text-emerald-700 font-medium">✓ {r.passes} passes</span>
-                <span className="text-red-700 font-medium">✗ {r.violations} violaciones</span>
-                <span className="text-amber-700 font-medium">? {r.incomplete} incompletos</span>
-              </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="bg-white rounded-lg p-4 border border-gray-200">
+            <h3 className="text-sm font-semibold text-gray-900 mb-2">Plataforma Web (LMS)</h3>
+            <p className="text-sm text-gray-600 mb-3">{resumenAuditoria.lms.metodologia}</p>
+            <div className="flex flex-wrap gap-4 text-sm">
+              <span className="text-emerald-700 font-medium">{resumenAuditoria.lms.passes} passes</span>
+              <span className="text-red-700 font-medium">{resumenAuditoria.lms.violations} violaciones</span>
+              <span className="text-amber-700 font-medium">{resumenAuditoria.lms.incomplete} incompletas</span>
             </div>
-          ))}
-        </div>
-
-        <div className="flex flex-wrap gap-4 text-sm text-gray-600">
-          <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-blue-200 inline-block"></span> Nivel A: {resultadosWCAG.filter(r => r.nivel === "A").length}</span>
-          <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-green-200 inline-block"></span> Nivel AA: {resultadosWCAG.filter(r => r.nivel === "AA").length}</span>
-          <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-purple-200 inline-block"></span> Nivel AAA: {resultadosWCAG.filter(r => r.nivel === "AAA").length}</span>
-          <span className="flex items-center gap-1">|</span>
-          <span className="flex items-center gap-1">LMS: {resultadosWCAG.filter(r => r.plataforma === "LMS" || r.plataforma === "Ambos").length}</span>
-          <span className="flex items-center gap-1">WhatsApp: {resultadosWCAG.filter(r => r.plataforma === "WhatsApp" || r.plataforma === "Ambos").length}</span>
+          </div>
+          <div className="bg-white rounded-lg p-4 border border-gray-200">
+            <h3 className="text-sm font-semibold text-gray-900 mb-2">Delivery Adaptativo por WhatsApp</h3>
+            <p className="text-sm text-gray-600 mb-3">{resumenAuditoria.whatsapp.metodologia}</p>
+            <div className="flex flex-wrap gap-4 text-sm">
+              <span className="text-emerald-700 font-medium">{resumenAuditoria.whatsapp.optimos} optimos</span>
+              <span className="text-blue-700 font-medium">{resumenAuditoria.whatsapp.cumplen} cumplen</span>
+              <span className="text-gray-700 font-medium">{resumenAuditoria.whatsapp.formatosEvaluados} formatos</span>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* Tabla WCAG */}
-      <section className="mb-12" aria-labelledby="tabla-heading">
-        <h2 id="tabla-heading" className="text-xl font-bold text-gray-900 mb-6">
-          Criterios WCAG 2.2 evaluados
+      <section className="mb-12" aria-labelledby="tabla-lms-heading">
+        <h2 id="tabla-lms-heading" className="text-xl font-bold text-gray-900 mb-3">
+          Plataforma Web (LMS) - Reglas axe evaluadas
         </h2>
-        <WcagReportTable resultados={resultadosWCAG} />
+        <p className="text-sm text-gray-600 mb-6">
+          Tabla completa de reglas clasificadas por axe como pasan, no pasan o requieren
+          revision manual. Esta auditoria aplica al LMS por ser desarrollo web propio.
+        </p>
+        <WcagReportTable resultados={resultadosAxeLMS} />
+      </section>
+
+      <section className="mb-12" aria-labelledby="tabla-whatsapp-heading">
+        <h2 id="tabla-whatsapp-heading" className="text-xl font-bold text-gray-900 mb-3">
+          Delivery Adaptativo por WhatsApp - Evaluacion del contenido
+        </h2>
+        <p className="text-sm text-gray-600 mb-4">
+          Esta seccion no usa axe porque el canal real es WhatsApp. Se evalua que el
+          contenido entregado sea accesible segun formato y perfil del usuario.
+        </p>
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+          <p className="text-sm text-blue-900">
+            Nota metodologica: {resumenAuditoria.whatsapp.nota}
+          </p>
+        </div>
+        <WhatsAppContentReportTable evaluaciones={evaluacionContenidoWhatsApp} />
       </section>
 
       {/* Principios POUR */}
@@ -164,11 +188,12 @@ export default function ReporteAccesibilidadPage() {
       {/* Evidencia visual */}
       <section className="mb-12" aria-labelledby="evidencia-heading">
         <h2 id="evidencia-heading" className="text-xl font-bold text-gray-900 mb-4">
-          Evidencia visual — Auditoría con axe DevTools
+          Evidencia visual y metodologica
         </h2>
         <p className="text-sm text-gray-600 mb-6">
-          Capturas generadas ejecutando axe-core vía Playwright sobre los dos componentes
-          del proyecto: Plataforma Web (LMS) y Delivery Adaptativo por WhatsApp.
+          Las capturas del LMS respaldan la auditoria tecnica con axe. Las capturas de
+          WhatsApp se conservan solo como evidencia ilustrativa del flujo de delivery
+          adaptativo, no como resultado tecnico de axe sobre el canal real.
         </p>
 
         <h3 className="font-semibold text-gray-900 mb-4">Capturas de página completa</h3>
@@ -176,7 +201,7 @@ export default function ReporteAccesibilidadPage() {
           <div className="bg-white border border-gray-200 rounded-lg p-4">
             <div className="flex items-center gap-2 mb-2">
               <span className="text-sm font-semibold text-gray-900">Plataforma Web (LMS)</span>
-              <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded">39 passes, 2 violaciones</span>
+              <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded">{resumenAuditoria.lms.passes} passes, {resumenAuditoria.lms.violations} violaciones</span>
             </div>
             <div className="relative w-full aspect-[4/3]">
               <Image
@@ -190,12 +215,12 @@ export default function ReporteAccesibilidadPage() {
           <div className="bg-white border border-gray-200 rounded-lg p-4">
             <div className="flex items-center gap-2 mb-2">
               <span className="text-sm font-semibold text-gray-900">Delivery Adaptativo por WhatsApp</span>
-              <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded">35 passes, 2 violaciones</span>
+              <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">Evidencia ilustrativa del flujo</span>
             </div>
             <div className="relative w-full aspect-[4/3]">
               <Image
                 src="/audits/whatsapp-screenshot.png"
-                alt="Captura del componente WhatsApp auditado con axe DevTools"
+                alt="Captura ilustrativa del flujo de contenido adaptativo por WhatsApp"
                 fill
                 className="object-contain border border-gray-200 rounded"
               />
@@ -222,34 +247,14 @@ export default function ReporteAccesibilidadPage() {
             </div>
           </div>
 
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-            <h4 className="font-bold text-sm text-red-800 mb-2">1.4.3 Contraste mínimo (AA) — 3 nodos en WhatsApp</h4>
-            <p className="text-sm text-gray-700 mb-2">
-              Elementos con contraste insuficiente en el simulador WhatsApp:
-              fondo ámbar con texto, texto semibold y texto con opacidad reducida.
-              2 nodos adicionales incompletos.
-            </p>
-            <div className="grid grid-cols-3 gap-2">
-              {["whatsapp-violation-color-contrast-0", "whatsapp-violation-color-contrast-1", "whatsapp-violation-color-contrast-2"].map((name) => (
-                <div key={name} className="relative w-full h-24">
-                  <Image
-                    src={`/audits/${name}.png`}
-                    alt={`Violación de contraste: ${name}`}
-                    fill
-                    className="object-contain border border-red-200 rounded"
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
 
           <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-            <h4 className="font-bold text-sm text-red-800 mb-2">page-has-heading-one — 1 nodo en LMS y 1 nodo en WhatsApp</h4>
+            <h4 className="font-bold text-sm text-red-800 mb-2">page-has-heading-one — 1 nodo en LMS</h4>
             <p className="text-sm text-gray-700">
-              Las páginas de auditoría contienen únicamente los componentes sin un
-              encabezado de nivel 1 (&lt;h1&gt;). Los componentes usan h2/h3 para su
-              estructura interna. Se recomienda agregar un h1 en la página wrapper
-              para cumplir con la estructura jerárquica de encabezados.
+              La pagina de auditoria del LMS contiene el componente sin un encabezado
+              de nivel 1 (&lt;h1&gt;) en el wrapper de auditoria. Se recomienda agregar
+              un h1 en esa pagina wrapper para cumplir con la estructura jerarquica
+              de encabezados.
             </p>
           </div>
         </div>
