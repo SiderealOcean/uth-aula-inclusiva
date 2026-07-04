@@ -13,7 +13,9 @@ const config: Config = {
           100: "#dbeafe",
           200: "#bfdbfe",
           500: "#1e40af",
+          600: "#1e3d9c",
           700: "#1e3a8a",
+          800: "#1a2f6f",
           900: "#172554",
         },
         surface: {
